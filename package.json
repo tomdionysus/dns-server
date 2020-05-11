@@ -15,7 +15,7 @@
     "udp"
   ],
   "author": "Tom Cully",
-  "license": "MIT",
+  "license": "0BSD",
   "bugs": {
     "url": "https://github.com/tomdionysus/dns-server/issues"
   },

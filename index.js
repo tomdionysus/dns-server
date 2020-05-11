@@ -19,7 +19,7 @@ function main() {
 	var svr = new DNSServer({
 		logger: logger,
 		env: process.env.ENV || 'prod',
-		port: parseInt(process.env.PORT) || 54
+		port: parseInt(process.env.PORT) || 53
 	})
 
 	var handle = ()=>{

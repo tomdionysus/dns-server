@@ -14,6 +14,14 @@ npm install
 
 ## Running
 
+The server will bind to UDP Port 53 by default. MacOS and various other OSes bind `0.0.0.0` UDP Port 53, so it's best to run it on a different one.
+
 ```bash
 PORT=54 node index.js
+```
+
+## Demo (using `dig`)
+
+```bash
+dig @localhost -p 54 hello.com +noedns
 ```

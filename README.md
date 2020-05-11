@@ -8,7 +8,6 @@ A Demo DNS Server project in NodeJS, to demonstrate [network-serializer](https:/
 
 **Note** This is a technology demo project, DO NOT use it as a DNS server.
 
-
 ## Installation
 
 ```bash

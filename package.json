@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/tomdionysus/dns-server#readme",
   "dependencies": {
-    "network-serializer": "file:../network-serializer"
+    "network-serializer": "0.0.1"
   }
 }

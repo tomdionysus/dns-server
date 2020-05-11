@@ -4,7 +4,6 @@ A Demo DNS Server project in NodeJS, to demonstrate [network-serializer](https:/
 
 **Note** This is a technology demo project, DO NOT use it as a DNS server.
 
-The server listens on port 53 (configurable) and answers all DNS queries with one stock 'demo' answer.
 
 ## Installation
 
@@ -21,6 +20,9 @@ PORT=54 node index.js
 ```
 
 ## Demo (using `dig`)
+
+The server listens on port 53 (configurable) and answers all DNS queries with one stock 'demo' answer. Please see [DNSServer.js](/lib/DNSServer.js) for the static response configuration.
+
 
 ```bash
 dig @localhost -p 54 hello.com +noedns

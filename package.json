@@ -1,0 +1,26 @@
+{
+  "name": "dns-server",
+  "version": "1.0.0",
+  "description": "A Demo of the npm udpmesh package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomdionysus/dns-server.git"
+  },
+  "keywords": [
+    "mesh",
+    "udp"
+  ],
+  "author": "Tom Cully",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tomdionysus/dns-server/issues"
+  },
+  "homepage": "https://github.com/tomdionysus/dns-server#readme",
+  "dependencies": {
+    "network-serializer": "file:../network-serializer"
+  }
+}

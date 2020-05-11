@@ -9,11 +9,11 @@ The server listens on port 53 (configurable) and answers all DNS queries with on
 ## Installation
 
 ```bash
-	npm install
+npm install
 ```
 
 ## Running
 
 ```bash
-	PORT=54 node index.js
+PORT=54 node index.js
 ```

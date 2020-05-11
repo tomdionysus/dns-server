@@ -1,5 +1,9 @@
 # dns-server
 
+[![Build Status](https://travis-ci.org/tomdionysus/dns-server.svg?branch=master)](https://travis-ci.org/tomdionysus/dns-server)
+[![Coverage Status](https://coveralls.io/repos/github/tomdionysus/dns-server/badge.svg?branch=master)](https://coveralls.io/github/tomdionysus/dns-server?branch=master)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
 A Demo DNS Server project in NodeJS, to demonstrate [network-serializer](https://github.com/tomdionysus/network-serializer).
 
 **Note** This is a technology demo project, DO NOT use it as a DNS server.

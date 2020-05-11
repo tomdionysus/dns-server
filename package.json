@@ -4,7 +4,9 @@
   "description": "A Demo of the npm udpmesh package",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node index.js",
+    "test": "node node_modules/nyc/bin/nyc.js --reporter=lcov --exclude=spec node_modules/jasmine/bin/jasmine.js && nyc report --reporter=text-lcov | coveralls",
+    "gendocs": "node node_modules/jsdoc/jsdoc.js lib lib/jsdoc README.md -c .jsdoc.js -d docs"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,11 @@
   "homepage": "https://github.com/tomdionysus/dns-server#readme",
   "dependencies": {
     "network-serializer": "0.0.1"
+  },
+  "devDependencies": {
+    "coveralls": "^3.1.0",
+    "jasmine": "^3.5.0",
+    "jsdoc": "^3.6.4",
+    "nyc": "^15.0.1"
   }
 }

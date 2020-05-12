@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/tomdionysus/dns-server#readme",
   "dependencies": {
+    "async": "^3.2.0",
+    "mysql": "^2.18.1",
     "network-serializer": "0.0.1"
   },
   "devDependencies": {

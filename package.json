@@ -25,7 +25,7 @@
   "dependencies": {
     "async": "^3.2.0",
     "mysql": "^2.18.1",
-    "network-serializer": "0.0.1"
+    "network-serializer": "file://../network-serializer"
   },
   "devDependencies": {
     "coveralls": "^3.1.0",

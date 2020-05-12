@@ -30,9 +30,7 @@ The server will needs a `DB_URI` in the following format, and will bind to UDP P
 DB_URI=mysql://root@localhost/$DATABASE_NAME LOG_LEVEL=DEBUG PORT=54 node index.js
 ```
 
-## Demo (using `dig`)
-
-The server listens on port 53 (configurable) and will answer DNS queries from the database.
+## Demo
 
 ```bash
 dig @localhost -p 54 example.com +noedns

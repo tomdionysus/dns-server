@@ -1,0 +1,2 @@
+#!/bin/bash
+mysqldump -u root --extended-insert=FALSE dnsserver > sql/db_setup.sql

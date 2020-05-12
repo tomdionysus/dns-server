@@ -14,19 +14,26 @@ A Demo DNS Server project in NodeJS, to demonstrate [network-serializer](https:/
 npm install
 ```
 
-## Running
-
-The server will bind to UDP Port 53 by default. MacOS and various other OSes bind `0.0.0.0` UDP Port 53, so it's best to run it on a different one.
+In addition, you will need an accessible MySQL/MariaDB database, initialised from the schema in [db_setup.sql](sql/db_setup.sql):
 
 ```bash
-PORT=54 node index.js
+export DATABASE_NAME="dnsserver"
+mysql -u root --execute="CREATE DATABASE $DATABASE_NAME;"
+mysql -u root $DATABASE_NAME < sql/db_setup.sql
+```
+
+## Running
+
+The server will needs a `DB_URI` in the following format, and will bind to UDP Port 53 by default. MacOS and various other OSes bind `0.0.0.0` UDP Port 53, so it's best to run it on a different one.
+
+```bash
+DB_URI=mysql://root@localhost/$DATABASE_NAME LOG_LEVEL=DEBUG PORT=54 node index.js
 ```
 
 ## Demo (using `dig`)
 
-The server listens on port 53 (configurable) and answers all DNS queries with one stock 'demo' answer. Please see [DNSServer.js](/lib/DNSServer.js) for the static response configuration.
-
+The server listens on port 53 (configurable) and will answer DNS queries from the database.
 
 ```bash
-dig @localhost -p 54 hello.com +noedns
+dig @localhost -p 54 example.com +noedns
 ```

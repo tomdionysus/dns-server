@@ -24,6 +24,7 @@
   "homepage": "https://github.com/tomdionysus/dns-server#readme",
   "dependencies": {
     "async": "^3.2.0",
+    "ip-address": "^6.3.0",
     "mysql": "^2.18.1",
     "network-serializer": "file://../network-serializer"
   },

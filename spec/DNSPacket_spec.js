@@ -1,3 +1,5 @@
+/* eslint-env jasmine */
+
 const DNSPacket = require('../lib/DNSPacket')
 
 describe('DNSPacket', () => {

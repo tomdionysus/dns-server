@@ -1,3 +1,5 @@
+/* eslint-env jasmine */
+
 class KVStoreMock {
   constructor (options) {
     options = options || {}

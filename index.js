@@ -17,15 +17,14 @@ function main () {
 
   // ENV and defaults
   try {
-    var dbUrl = url.parse(process.env.DB_URI)
+    var dbUrl = new url.URL(process.env.DB_URI)
   } catch (err) {
     logger.error('Cannot parse env DB_URI (should be mysql://user:password@host:port/database)')
     process.exit(1)
   }
-  var auth = dbUrl.auth.split(':')
 
   // Dependencies
-  var mysql = new MySQL({ logger: logger, host: dbUrl.host, user: auth[0], database: dbUrl.pathname.substr(1), password: auth[1] })
+  var mysql = new MySQL({ logger: logger, host: dbUrl.host, user: dbUrl.username, database: dbUrl.pathname.substr(1), password: dbUrl.password })
 
   // Start MySQL
   mysql.connect()

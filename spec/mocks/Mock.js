@@ -1,3 +1,5 @@
+/* eslint-env jasmine */
+
 class Mock {
   constructor (options = {}) {
     this.configure(options)

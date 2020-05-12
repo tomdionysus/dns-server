@@ -1,3 +1,5 @@
+/* eslint-env jasmine */
+
 const Mock = require('./Mock')
 
 class LoggerMock extends Mock {

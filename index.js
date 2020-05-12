@@ -6,7 +6,6 @@ const MySQL = require('./lib/MySQL')
 const DNSServer = require('./lib/DNSServer')
 
 function main () {
-
   // Logger
   var logger = new Logger()
 
@@ -27,7 +26,7 @@ function main () {
 
   // Dependencies
   var mysql = new MySQL({ logger: logger, host: dbUrl.host, user: auth[0], database: dbUrl.pathname.substr(1), password: auth[1] })
-  
+
   // Start MySQL
   mysql.connect()
 

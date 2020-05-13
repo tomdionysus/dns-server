@@ -15,6 +15,48 @@ describe('DNSPacket', () => {
     expect(x1).not.toBe(x2)
   })
 
+  describe('toBuffer', ()=>{
+    it('should return correct buffer',()=>{
+      x1.flags = {
+        response: true,
+        authoriative: false,
+        truncated: true,
+        recursionDesired: false,
+        recursionAvailable: true,
+        opCode: 10,
+        responseCode: 5
+      }
+      x1.question = [
+        { qname: 'domain.', qtype: DNSPacket.QType.ANY, qclass: DNSPacket.QClass.IN }
+      ]
+
+      expect([...x1.toBuffer()]).toEqual([ 0, 0, 210, 133, 0, 1, 0, 0, 0, 0, 0, 0, 6, 100, 111, 109, 97, 105, 110, 0, 0, 255, 0, 1 ])
+    })
+  })
+
+  describe('fromBuffer', ()=>{
+    it('should parse buffer into correct object',()=>{
+
+      var b = new Buffer([ 0, 0, 210, 133, 0, 1, 0, 0, 0, 0, 0, 0, 6, 100, 111, 109, 97, 105, 110, 0, 0, 255, 0, 1 ])
+      var c = DNSPacket.fromBuffer(b)
+
+      expect(c.flags).toEqual({
+        response: true,
+        authoriative: false,
+        truncated: true,
+        recursionDesired: false,
+        recursionAvailable: true,
+        opCode: 10,
+        responseCode: 5
+      })
+      expect(c.question).toEqual([
+        { qname: 'domain.', qtype: DNSPacket.QType.ANY, qclass: DNSPacket.QClass.IN }
+      ])
+      expect(c.answer).toEqual([])
+      expect(c.authority).toEqual([])
+    })
+  })
+
   describe('deserialize', ()=>{
     it('should read from des, call submethods and set properties',()=>{
       spyOn(x1,'_deserializeFlags')

@@ -18,8 +18,7 @@ describe('DNSPacket', () => {
   describe('deserialize', ()=>{
     it('should read from des, call submethods and set properties',()=>{
       spyOn(x1,'_deserializeFlags')
-      spyOn(x1,'_readQuestionRRs').and.returnValue('_readQuestionRRs')
-      spyOn(x1,'_readAnswerRRs').and.returnValue('_readAnswerRRs')
+      spyOn(x1,'_readResourceRecords').and.returnValue('_readResourceRecords')
       
       var x = 0, des = { readUInt16: ()=>{ return x++ } }
       spyOn(des,'readUInt16').and.callThrough()
@@ -30,12 +29,12 @@ describe('DNSPacket', () => {
       expect(des.readUInt16).toHaveBeenCalledWith()
 
       expect(x1._deserializeFlags).toHaveBeenCalledWith(1)
-      expect(x1._readQuestionRRs).toHaveBeenCalledWith(des,2)
 
-      expect(x1._readAnswerRRs).toHaveBeenCalledTimes(3)
-      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,3)
-      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,4)
-      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,5)
+      expect(x1._readResourceRecords).toHaveBeenCalledTimes(4)
+      expect(x1._readResourceRecords).toHaveBeenCalledWith(des,2,true)
+      expect(x1._readResourceRecords).toHaveBeenCalledWith(des,3,false)
+      expect(x1._readResourceRecords).toHaveBeenCalledWith(des,4,false)
+      expect(x1._readResourceRecords).toHaveBeenCalledWith(des,5,false)
 
       expect(x1.id).toEqual(0)
     })
@@ -44,8 +43,7 @@ describe('DNSPacket', () => {
   describe('serialize', ()=>{
     it('should write to ser, call submethods and set properties',()=>{
       spyOn(x1,'_serializeFlags').and.returnValue('_serializeFlags')
-      spyOn(x1,'_writeQuestionRRs').and.returnValue('_writeQuestionRRs')
-      spyOn(x1,'_writeAnswerRRs').and.returnValue('_writeAnswerRRs')
+      spyOn(x1,'_writeResourceRecords').and.returnValue('_writeResourceRecords')
 
       var ser = { writeUInt16: ()=>{ } }
       spyOn(ser,'writeUInt16').and.callThrough()
@@ -66,10 +64,10 @@ describe('DNSPacket', () => {
       expect(ser.writeUInt16).toHaveBeenCalledWith(3)
       expect(ser.writeUInt16).toHaveBeenCalledWith(4)
 
-      expect(x1._writeQuestionRRs).toHaveBeenCalledWith(ser,x1.question)
-      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.answer)
-      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.authority)
-      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.additional)
+      expect(x1._writeResourceRecords).toHaveBeenCalledWith(ser, x1.question, true)
+      expect(x1._writeResourceRecords).toHaveBeenCalledWith(ser, x1.answer, false)
+      expect(x1._writeResourceRecords).toHaveBeenCalledWith(ser, x1.authority, false)
+      expect(x1._writeResourceRecords).toHaveBeenCalledWith(ser, x1.additional, false)
     })
   })
 

@@ -31,11 +31,6 @@ describe('MySQL', () => {
 
   describe('_query', () => {
     it('should log, call pool query and callback', () => {
-      var cb = {
-        callback: () => {}
-      }
-      spyOn(cb, 'callback')
-
       var conn = {
         logger: logger,
         pool: {
@@ -43,19 +38,22 @@ describe('MySQL', () => {
         }
       }
       spyOn(conn.pool, 'query').and.callThrough()
+      var cb = {
+        callback: () => {
+          expect(logger.debug).toHaveBeenCalledWith('Query `QUERY` (["PARAM"])')
+          expect(conn.pool.query).toHaveBeenCalledWith('QUERY', ['PARAM'], jasmine.any(Function))
+          expect(logger.error).not.toHaveBeenCalled()
+        }
+      }
+      spyOn(cb, 'callback').and.callThrough()
 
       MySQL._query(conn, 'QUERY', ['PARAM'], cb.callback)
 
-      expect(logger.debug).toHaveBeenCalledWith('Query `QUERY` (["PARAM"])')
-      expect(conn.pool.query).toHaveBeenCalledWith('QUERY', ['PARAM'], jasmine.any(Function))
-      expect(logger.error).not.toHaveBeenCalled()
       expect(cb.callback).toHaveBeenCalledWith(null, 'DATA', 'FIELDS')
     })
 
     it('should log, call pool query and log and pass error on callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var conn = {
@@ -79,32 +77,23 @@ describe('MySQL', () => {
     it('should pass to _query if caching disabled', () => {
       var x1 = new MySQL()
 
-      var r = MySQL._query
       spyOn(MySQL, '_query')
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', 'CALLBACK')
 
       expect(MySQL._query).toHaveBeenCalledWith({ logger: jasmine.any(LoggerMock) }, 'QUERY', 'PARAMS', 'CALLBACK')
       expect(logger.debug).not.toHaveBeenCalled()
-
-      MySQL._query = r
     })
 
     it('should log and call kvstore get and callback on cache hit', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnData: '{"results":[{"test":1}],"fields":[{"field":"def"}]}' }) })
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', cb.callback)
 
@@ -115,20 +104,15 @@ describe('MySQL', () => {
     })
 
     it('should log, call kvstore get, pass to _query on memcache miss, call set and callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnData: null }) })
 
-      var r = MySQL._query
       MySQL._query = (conn, query, params, callback) => { callback(null, [{ data: 1 }], [{ field: 1 }]) }
       spyOn(MySQL, '_query').and.callThrough()
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', cb.callback)
 
@@ -142,25 +126,17 @@ describe('MySQL', () => {
       expect(x1.kvstore.set).toHaveBeenCalledWith(jasmine.anyHash256, '{"results":[{"data":1}],"fields":[{"field":1}]}', 'EXPIRY', jasmine.any(Function))
 
       expect(cb.callback).toHaveBeenCalledWith(null, [{ data: 1 }], [{ field: 1 }])
-
-      MySQL._query = r
     })
 
     it('should log, call kvstore get, pass to _query on memcache miss, warn and callback when data is too long', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnData: null }) })
 
-      var r = MySQL._query
-      MySQL._query = (conn, query, params, callback) => { callback(null, [{ data: 'XXXXXXXXXXXXXXXX'.repeat(65537) }], [{ field: 1 }]) }
-      spyOn(MySQL, '_query').and.callThrough()
+      spyOn(MySQL, '_query').and.callFake((conn, query, params, callback) => { callback(null, [{ data: 'XXXXXXXXXXXXXXXX'.repeat(65537) }], [{ field: 1 }]) })
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', cb.callback)
 
@@ -176,24 +152,17 @@ describe('MySQL', () => {
 
       expect(cb.callback).toHaveBeenCalledWith(null, [{ data: jasmine.any(String) }], [{ field: 1 }])
 
-      MySQL._query = r
     })
 
     it('should log, call kvstore get, pass to _query on memcache miss, call set, warn and callback when set fails', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnData: null, returnErrorSet: 'ERROR' }) })
 
-      var r = MySQL._query
-      MySQL._query = (conn, query, params, callback) => { callback(null, [{ data: 1 }], [{ field: 1 }]) }
-      spyOn(MySQL, '_query').and.callThrough()
+      spyOn(MySQL, '_query').and.callFake((conn, query, params, callback) => { callback(null, [{ data: 1 }], [{ field: 1 }]) })
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', cb.callback)
 
@@ -208,25 +177,17 @@ describe('MySQL', () => {
       expect(x1.kvstore.set).toHaveBeenCalledWith(jasmine.anyHash256, '{"results":[{"data":1}],"fields":[{"field":1}]}', 'EXPIRY', jasmine.any(Function))
 
       expect(cb.callback).toHaveBeenCalledWith(null, [{ data: 1 }], [{ field: 1 }])
-
-      MySQL._query = r
     })
 
     it('should log, call kvstore get, pass to _query on memcache miss and callback with _query error', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnData: null }) })
 
-      var r = MySQL._query
-      MySQL._query = (conn, query, params, callback) => { callback('DBERROR') }
-      spyOn(MySQL, '_query').and.callThrough()
+      spyOn(MySQL, '_query').and.callFake((conn, query, params, callback) => { callback('DBERROR') })
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', cb.callback)
 
@@ -240,34 +201,25 @@ describe('MySQL', () => {
       expect(x1.kvstore.set).not.toHaveBeenCalled()
 
       expect(cb.callback).toHaveBeenCalledWith('DBERROR')
-
-      MySQL._query = r
     })
 
     it('should log, call kvstore get and pass to _query on memcache err', () => {
       var x1 = new MySQL({ kvstore: new KVStoreMock({ returnError: 'ERROR' }) })
 
-      var r = MySQL._query
       spyOn(MySQL, '_query')
 
-      var conn = {
-        logger: logger
-      }
+      var conn = { logger: logger }
 
       x1._cachequery(conn, 'QUERY', 'PARAMS', 'EXPIRY', 'CALLBACK')
 
       expect(MySQL._query).toHaveBeenCalledWith({ logger: jasmine.any(LoggerMock) }, 'QUERY', 'PARAMS', 'CALLBACK')
       expect(logger.warn).toHaveBeenCalledWith('Loading DB Cache %s Failed: ', jasmine.anyHash256, 'ERROR')
-
-      MySQL._query = r
     })
   })
 
   describe('_query', () => {
     it('should call through to _cachequery', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
 
       var x1 = new MySQL()
 
@@ -281,13 +233,10 @@ describe('MySQL', () => {
 
   describe('query', () => {
     it('should call through to _query', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
+      spyOn(MySQL, '_query')
 
       var x1 = new MySQL()
-
-      spyOn(MySQL, '_query')
 
       x1.query('QUERY', ['PARAM'], cb.callback)
 
@@ -297,23 +246,15 @@ describe('MySQL', () => {
 
   describe('begin', () => {
     it('should log, call pool getConnection, call conn beginTransaction and callback', () => {
-      var trans
-
-      var cb = {
-        callback: (err, tr) => { trans = tr }
-      }
+      var trans, cb = { callback: (err, tr) => { trans = tr } }
       spyOn(cb, 'callback').and.callThrough()
 
       var x1 = new MySQL({ logger: logger })
 
-      var conn = {
-        beginTransaction: (callback) => { callback(null) }
-      }
+      var conn = { beginTransaction: (callback) => { callback(null) } }
       spyOn(conn, 'beginTransaction').and.callThrough()
 
-      x1.pool = {
-        getConnection: (callback) => { callback(null, conn) }
-      }
+      x1.pool = { getConnection: (callback) => { callback(null, conn) } }
       spyOn(x1.pool, 'getConnection').and.callThrough()
 
       x1.begin(cb.callback)
@@ -326,11 +267,7 @@ describe('MySQL', () => {
     })
 
     it('should log, call pool getConnection and callback with error on fail', () => {
-      var trans
-
-      var cb = {
-        callback: (err, tr) => { trans = tr }
-      }
+      var trans, cb = { callback: (err, tr) => { trans = tr } }
       spyOn(cb, 'callback').and.callThrough()
 
       var x1 = new MySQL({ logger: logger })
@@ -354,23 +291,15 @@ describe('MySQL', () => {
     })
 
     it('should log, call pool getConnection, call conn beginTransaction and callback with error on bT fail', () => {
-      var trans
-
-      var cb = {
-        callback: (err, tr) => { trans = tr }
-      }
+      var trans, cb = { callback: (err, tr) => { trans = tr } }
       spyOn(cb, 'callback').and.callThrough()
 
       var x1 = new MySQL({ logger: logger })
 
-      var conn = {
-        beginTransaction: (callback) => { callback('BTERROR') }
-      }
+      var conn = { beginTransaction: (callback) => { callback('BTERROR') } }
       spyOn(conn, 'beginTransaction').and.callThrough()
 
-      x1.pool = {
-        getConnection: (callback) => { callback(null, conn) }
-      }
+      x1.pool = { getConnection: (callback) => { callback(null, conn) } }
       spyOn(x1.pool, 'getConnection').and.callThrough()
 
       x1.begin(cb.callback)
@@ -384,16 +313,12 @@ describe('MySQL', () => {
 
   describe('end', () => {
     it('should log, call pool end and callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ logger: logger })
 
-      x1.pool = {
-        end: (callback) => { callback(null) }
-      }
+      x1.pool = { end: (callback) => { callback(null) } }
       spyOn(x1.pool, 'end').and.callThrough()
 
       x1.end(cb.callback)
@@ -405,16 +330,12 @@ describe('MySQL', () => {
     })
 
     it('should log, call pool end and pass error to callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var x1 = new MySQL({ logger: logger })
 
-      x1.pool = {
-        end: (callback) => { callback('ERROR') }
-      }
+      x1.pool = { end: (callback) => { callback('ERROR') } }
       spyOn(x1.pool, 'end').and.callThrough()
 
       x1.end(cb.callback)
@@ -436,19 +357,13 @@ describe('MySQL', () => {
         database: 'database'
       })
 
-      var conn = {
-        release: () => {}
-      }
+      var conn = { release: () => {} }
       spyOn(conn, 'release')
 
-      var pool = {
-        getConnection: (callback) => { callback(null, conn) }
-      }
+      var pool = { getConnection: (callback) => { callback(null, conn) } }
       spyOn(pool, 'getConnection').and.callThrough()
 
-      x1.mysql = {
-        createPool: () => { return pool }
-      }
+      x1.mysql = { createPool: () => { return pool } }
       spyOn(x1.mysql, 'createPool').and.callThrough()
 
       x1.connect()
@@ -470,19 +385,13 @@ describe('MySQL', () => {
         database: 'database'
       })
 
-      var conn = {
-        release: () => {}
-      }
+      var conn = { release: () => {} }
       spyOn(conn, 'release')
 
-      var pool = {
-        getConnection: (callback) => { callback('ERROR') }
-      }
+      var pool = { getConnection: (callback) => { callback('ERROR') } }
       spyOn(pool, 'getConnection').and.callThrough()
 
-      x1.mysql = {
-        createPool: () => { return pool }
-      }
+      x1.mysql = { createPool: () => { return pool } }
       spyOn(x1.mysql, 'createPool').and.callThrough()
 
       x1.connect()
@@ -497,19 +406,14 @@ describe('MySQL', () => {
 
   describe('getSQLOrderSortBy', () => {
     it('should return correct SQL', () => {
-      var context = {
-        sort_by: 'one'
-      }
+      var context = { sort_by: 'one' }
       var allowed = ['one', 'two']
 
       expect(MySQL.getSQLOrderSortBy(context, allowed)).toEqual(' ORDER BY one,id')
     })
 
     it('should return correct SQL and direction', () => {
-      var context = {
-        sort_by: 'one',
-        sort_dir: 'desc'
-      }
+      var context = { sort_by: 'one', sort_dir: 'desc' }
       var allowed = ['one', 'two']
 
       expect(MySQL.getSQLOrderSortBy(context, allowed)).toEqual(' ORDER BY one DESC,id')
@@ -538,9 +442,7 @@ describe('MySQL', () => {
     })
 
     it('should return correct SQL for non-null page', () => {
-      var context = {
-        page: 42
-      }
+      var context = { page: 42 }
 
       expect(MySQL.getSQLPagination(context, 1024)).toEqual('LIMIT 840,20')
     })
@@ -743,7 +645,6 @@ describe('Transaction', () => {
         _cachequery: () => {},
         logger: logger
       }
-      var r = MySQL._query
       spyOn(MySQL, '_query')
 
       var x1 = new MySQL.Transaction({ engine: engine })
@@ -752,16 +653,12 @@ describe('Transaction', () => {
 
       expect(MySQL._query).toHaveBeenCalledWith(x1, 'QUERY', 'PARAMS', 'CALLBACK')
       expect(engine.logger.debug).toHaveBeenCalledWith(jasmine.stringMatching(/\(Transaction [0-9a-f]{16}\) BEGIN/))
-
-      MySQL._query = r
     })
   })
 
   describe('commit', () => {
     it('should call commit on pool and callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var engine = {
@@ -786,9 +683,7 @@ describe('Transaction', () => {
     })
 
     it('should call commit on pool and callback with error', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var engine = {
@@ -815,9 +710,7 @@ describe('Transaction', () => {
 
   describe('rollback', () => {
     it('should call rollback on pool and callback', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var engine = {
@@ -842,9 +735,7 @@ describe('Transaction', () => {
     })
 
     it('should call rollback on pool and callback with error', () => {
-      var cb = {
-        callback: () => {}
-      }
+      var cb = { callback: () => {} }
       spyOn(cb, 'callback')
 
       var engine = {

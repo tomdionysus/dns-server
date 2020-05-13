@@ -30,6 +30,12 @@
   },
   "devDependencies": {
     "coveralls": "^3.1.0",
+    "eslint": "^7.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "jasmine": "^3.5.0",
     "jsdoc": "^3.6.4",
     "nyc": "^15.0.1"

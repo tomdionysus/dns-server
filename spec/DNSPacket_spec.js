@@ -17,7 +17,7 @@ describe('DNSPacket', () => {
 
   describe('deserialize', ()=>{
     it('should read from des, call submethods and set properties',()=>{
-      spyOn(x1,'_deserializeFlags').and.returnValue('_deserializeFlags')
+      spyOn(x1,'_deserializeFlags')
       spyOn(x1,'_readQuestionRRs').and.returnValue('_readQuestionRRs')
       spyOn(x1,'_readAnswerRRs').and.returnValue('_readAnswerRRs')
       
@@ -38,7 +38,6 @@ describe('DNSPacket', () => {
       expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,5)
 
       expect(x1.id).toEqual(0)
-      expect(x1.flags).toEqual('_deserializeFlags')
     })
   })
 
@@ -71,6 +70,66 @@ describe('DNSPacket', () => {
       expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.answer)
       expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.authority)
       expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.additional)
+    })
+  })
+
+  describe('_serializeFlags', ()=>{
+    it('should pack flags properly, 1',()=>{
+      x1.flags = {
+        response: true,
+        authoriative: false,
+        truncated: true,
+        recursionDesired: false,
+        recursionAvailable: true,
+        opCode: 10,
+        responseCode: 5
+      }
+
+      expect(x1._serializeFlags()).toEqual(53893)
+    })
+
+    it('should pack flags properly, 2',()=>{
+      x1.flags = {
+        response: false,
+        authoriative: true,
+        truncated: false,
+        recursionDesired: true,
+        recursionAvailable: false,
+        opCode: 5,
+        responseCode: 10
+      }
+
+      expect(x1._serializeFlags()).toEqual(11530)
+    })
+  })
+
+  describe('_deserializeFlags', ()=>{
+    it('should unpack flags properly, 1',()=>{
+      x1._deserializeFlags(53893)
+
+      expect(x1.flags).toEqual({
+        response: true,
+        authoriative: false,
+        truncated: true,
+        recursionDesired: false,
+        recursionAvailable: true,
+        opCode: 10,
+        responseCode: 5
+      })
+    })
+
+    it('should unpack flags properly, 2',()=>{
+      x1._deserializeFlags(11530)
+
+      expect(x1.flags).toEqual({
+        response: false,
+        authoriative: true,
+        truncated: false,
+        recursionDesired: true,
+        recursionAvailable: false,
+        opCode: 5,
+        responseCode: 10
+      })
     })
   })
 

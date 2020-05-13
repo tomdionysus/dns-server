@@ -15,6 +15,65 @@ describe('DNSPacket', () => {
     expect(x1).not.toBe(x2)
   })
 
+  describe('deserialize', ()=>{
+    it('should read from des, call submethods and set properties',()=>{
+      spyOn(x1,'_deserializeFlags').and.returnValue('_deserializeFlags')
+      spyOn(x1,'_readQuestionRRs').and.returnValue('_readQuestionRRs')
+      spyOn(x1,'_readAnswerRRs').and.returnValue('_readAnswerRRs')
+      
+      var x = 0, des = { readUInt16: ()=>{ return x++ } }
+      spyOn(des,'readUInt16').and.callThrough()
+
+      x1.deserialize(des)
+
+      expect(des.readUInt16).toHaveBeenCalledTimes(6)
+      expect(des.readUInt16).toHaveBeenCalledWith()
+
+      expect(x1._deserializeFlags).toHaveBeenCalledWith(1)
+      expect(x1._readQuestionRRs).toHaveBeenCalledWith(des,2)
+
+      expect(x1._readAnswerRRs).toHaveBeenCalledTimes(3)
+      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,3)
+      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,4)
+      expect(x1._readAnswerRRs).toHaveBeenCalledWith(des,5)
+
+      expect(x1.id).toEqual(0)
+      expect(x1.flags).toEqual('_deserializeFlags')
+    })
+  })
+
+  describe('serialize', ()=>{
+    it('should write to ser, call submethods and set properties',()=>{
+      spyOn(x1,'_serializeFlags').and.returnValue('_serializeFlags')
+      spyOn(x1,'_writeQuestionRRs').and.returnValue('_writeQuestionRRs')
+      spyOn(x1,'_writeAnswerRRs').and.returnValue('_writeAnswerRRs')
+
+      var ser = { writeUInt16: ()=>{ } }
+      spyOn(ser,'writeUInt16').and.callThrough()
+
+      x1.id='ID'
+      x1.question = [ 0 ] 
+      x1.answer = [ 0, 1 ] 
+      x1.authority = [ 0, 1, 2 ] 
+      x1.additional = [ 0, 1, 2, 3 ] 
+
+      x1.serialize(ser)
+
+      expect(ser.writeUInt16).toHaveBeenCalledTimes(6)
+      expect(ser.writeUInt16).toHaveBeenCalledWith('ID')
+      expect(ser.writeUInt16).toHaveBeenCalledWith('_serializeFlags')
+      expect(ser.writeUInt16).toHaveBeenCalledWith(1)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(2)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(3)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(4)
+
+      expect(x1._writeQuestionRRs).toHaveBeenCalledWith(ser,x1.question)
+      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.answer)
+      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.authority)
+      expect(x1._writeAnswerRRs).toHaveBeenCalledWith(ser,x1.additional)
+    })
+  })
+
   describe('_readARR', ()=>{
     it('should call _readIPv4 and return object',()=>{
       spyOn(x1,'_readIPv4').and.returnValue('IPADDR')

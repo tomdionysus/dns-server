@@ -383,4 +383,158 @@ describe('DNSPacket', () => {
       expect(x1._readIPv6).toHaveBeenCalledWith(des)
     })
   })
+
+  describe('_writeARR', ()=>{
+    it('should call _writeIPv4',()=>{
+      spyOn(x1,'_writeIPv4')
+
+      x1._writeARR('SER',{ address: 'ADDRESS' })
+      expect(x1._writeIPv4).toHaveBeenCalledWith('SER','ADDRESS')
+    })
+  })
+
+  describe('_writeNSR', ()=>{
+    it('should call _writeDomain',()=>{
+      spyOn(x1,'_writeDomain')
+
+      x1._writeNSR('SER',{ name: 'NAME' })
+      expect(x1._writeDomain).toHaveBeenCalledWith('SER','NAME')
+    })
+  })
+
+  describe('_writeCNAMER', ()=>{
+    it('should call _writeDomain',()=>{
+      spyOn(x1,'_writeDomain')
+
+      x1._writeCNAMER('SER',{ name: 'NAME' })
+      expect(x1._writeDomain).toHaveBeenCalledWith('SER','NAME')
+    })
+  })
+
+  describe('_writeSOAR', ()=>{
+    it('should call _writeDomain and writeUInt32',()=>{
+      spyOn(x1,'_writeDomain')
+
+      var ser = { writeUInt32: ()=>{} }
+      spyOn(ser,'writeUInt32')
+
+      x1._writeSOAR(ser,{ name: 'NAME', admin: 'ADMIN', serial: 1, refresh: 2, retry: 3, expiration: 4, ttl: 5 })
+      
+      expect(x1._writeDomain).toHaveBeenCalledTimes(2)
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser,'NAME')
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser,'ADMIN')
+
+      expect(ser.writeUInt32).toHaveBeenCalledTimes(5)
+      expect(ser.writeUInt32).toHaveBeenCalledWith(1)
+      expect(ser.writeUInt32).toHaveBeenCalledWith(2)
+      expect(ser.writeUInt32).toHaveBeenCalledWith(3)
+      expect(ser.writeUInt32).toHaveBeenCalledWith(4)
+      expect(ser.writeUInt32).toHaveBeenCalledWith(5)
+    })
+  })
+
+  describe('_writePTRR', ()=>{
+    it('should call _writeDomain',()=>{
+      spyOn(x1,'_writeDomain')
+
+      x1._writePTRR('SER',{ name: 'NAME' })
+      expect(x1._writeDomain).toHaveBeenCalledWith('SER','NAME')
+    })
+  })
+
+  describe('_writeMXR', ()=>{
+    it('should call _writeDomain and writeUInt16',()=>{
+      spyOn(x1,'_writeDomain')
+
+      var ser = { writeUInt16: ()=>{} }
+      spyOn(ser,'writeUInt16')
+
+      x1._writeMXR(ser,{ exchange: 'NAME', preference: 10 })
+      
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser,'NAME')
+      expect(ser.writeUInt16).toHaveBeenCalledWith(10)
+    })
+  })
+
+  describe('_writeTXTR', ()=>{
+    it('should call _writeDomain',()=>{
+      spyOn(x1,'_writeDomain')
+
+      x1._writeTXTR('SER',{ text: 'TEXT' })
+      expect(x1._writeDomain).toHaveBeenCalledWith('SER', 'TEXT', false)
+    })
+  })
+
+  describe('_writeAAAAR', ()=>{
+    it('should call _writeIPv4',()=>{
+      spyOn(x1,'_writeIPv6')
+
+      x1._writeAAAAR('SER',{ address: 'ADDRESS' })
+      expect(x1._writeIPv6).toHaveBeenCalledWith('SER','ADDRESS')
+    })
+  })
+
+  describe('_writeSRVR', ()=>{
+    it('should call _writeDomain and writeUInt32',()=>{
+      spyOn(x1,'_writeDomain')
+
+      var ser = { writeUInt16: ()=>{} }
+      spyOn(ser,'writeUInt16').and.returnValue(10)
+
+      x1._writeSRVR(ser,{ target: 'TARGET', priority: 1, weight: 2, port: 3 })
+      
+      expect(ser.writeUInt16).toHaveBeenCalledTimes(3)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(1)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(2)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(3)
+
+      expect(x1._writeDomain).toHaveBeenCalledTimes(1)
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser,'TARGET')
+    })
+  })
+
+  describe('_readIPv4', ()=>{
+    it('should call readUInt32 and return address',()=>{
+      var des = { readUInt32: ()=>{} }
+      spyOn(des,'readUInt32').and.returnValue(0x08080808)
+
+      expect(x1._readIPv4(des)).toEqual('8.8.8.8')
+      
+      expect(des.readUInt32).toHaveBeenCalledWith()
+    })
+  })
+
+  describe('_readIPv6', ()=>{
+    it('should call readBytes and return address',()=>{
+      var des = { readBytes: ()=>{} }
+      spyOn(des,'readBytes').and.returnValue(Buffer.from([10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160]))
+
+      expect(x1._readIPv6(des)).toEqual('a14:1e28:323c:4650:5a64:6e78:828c:96a0')
+      
+      expect(des.readBytes).toHaveBeenCalledWith(16)
+    })
+  })
+
+  describe('_writeIPv4', ()=>{
+    it('should call writeBytes with correct params',()=>{
+      var ser = { writeBytes: ()=>{} }
+      spyOn(ser,'writeBytes')
+
+      x1._writeIPv4(ser,'4.4.4.4')
+      
+      expect(ser.writeBytes).toHaveBeenCalledWith(Buffer.from([ 4, 4, 4, 4 ]))
+    })
+  })
+
+  describe('_writeIPv6', ()=>{
+    it('should call readBytes and return address',()=>{
+      var des = { writeBytes: ()=>{} }
+      spyOn(des,'writeBytes')
+
+      x1._writeIPv6(des,'2407:7000:8427:234:3d2a:19b6:c101:eef9')
+      
+      expect(des.writeBytes).toHaveBeenCalledWith(Buffer.from([ 36, 7, 112, 0, 132, 39, 2, 52, 61, 42, 25, 182, 193, 1, 238, 249 ]))
+    })
+  })
+
 })

@@ -384,6 +384,147 @@ describe('DNSPacket', () => {
     })
   })
 
+  describe('_writeResourceRecord', ()=>{
+    it('should write qname, qtype and qclass and return if question RR',()=>{
+      spyOn(x1,'_writeDomain')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{} }
+      spyOn(ser,'writeUInt16')
+      spyOn(ser,'writeUInt32')
+
+      x1._writeResourceRecord(ser, { qname:'QNAME',qtype:'QTYPE',qclass:'QCLASS' }, true)
+
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser, 'QNAME')
+      expect(ser.writeUInt16).toHaveBeenCalledTimes(2)
+      expect(ser.writeUInt16).toHaveBeenCalledWith('QTYPE')
+      expect(ser.writeUInt16).toHaveBeenCalledWith('QCLASS')
+
+      expect(ser.writeUInt32).not.toHaveBeenCalled()
+    })
+
+    it('should write all if not question RR',()=>{
+      spyOn(x1,'_writeDomain')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+      spyOn(ser,'writeUInt16')
+      spyOn(ser,'writeUInt32')
+      spyOn(ser,'seek')
+
+      x1._writeResourceRecord(ser, { qname:'QNAME',qtype:'QTYPE',qclass:'QCLASS',ttl:'TTL' }, false)
+
+      expect(x1._writeDomain).toHaveBeenCalledWith(ser, 'QNAME')
+      expect(ser.writeUInt16).toHaveBeenCalledWith('QTYPE')
+      expect(ser.writeUInt16).toHaveBeenCalledWith('QCLASS')
+
+      expect(ser.writeUInt32).toHaveBeenCalledWith('TTL')
+
+      expect(ser.seek).toHaveBeenCalledWith(40)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(0)
+      expect(ser.writeUInt16).toHaveBeenCalledWith(-2)
+      expect(ser.seek).toHaveBeenCalledWith(40)
+    })
+
+    it('should call _writeARR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeARR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.A, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeARR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeNSR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeNSR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.NS, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeNSR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeCNAMER for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeCNAMER')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.CNAME, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeCNAMER).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeSOAR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeSOAR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.SOA, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeSOAR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writePTRR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writePTRR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.PTR, rddata: 'RDDATA' }, false)
+
+      expect(x1._writePTRR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeMXR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeMXR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.MX, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeMXR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeTXTR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeTXTR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.TXT, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeTXTR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeSRVR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeSRVR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.SRV, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeSRVR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+    it('should call _writeAAAAR for correct RR',()=>{
+      spyOn(x1,'_writeDomain')
+      spyOn(x1,'_writeAAAAR')
+
+      var ser = { writeUInt16: ()=>{} ,writeUInt32: ()=>{}, seek: ()=>{}, offset: 40 }
+
+      x1._writeResourceRecord(ser, { qtype:DNSPacket.QType.AAAA, rddata: 'RDDATA' }, false)
+
+      expect(x1._writeAAAAR).toHaveBeenCalledWith(ser,'RDDATA')
+    })
+
+  })
+
   describe('_writeARR', ()=>{
     it('should call _writeIPv4',()=>{
       spyOn(x1,'_writeIPv4')

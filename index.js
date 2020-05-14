@@ -15,16 +15,8 @@ function main () {
   logger.log('', '----')
   logger.log('Logging Level %s', '----', Logger.logLevelToString(logger.logLevel))
 
-  // ENV and defaults
-  try {
-    var dbUrl = new url.URL(process.env.DB_URI)
-  } catch (err) {
-    logger.error('Cannot parse env DB_URI (should be mysql://user:password@host:port/database)')
-    process.exit(1)
-  }
-
   // Dependencies
-  var mysql = new MySQL({ logger: logger, host: dbUrl.host, user: dbUrl.username, database: dbUrl.pathname.substr(1), password: dbUrl.password })
+  var mysql = new MySQL({ logger: logger, uri: process.env.DB_URI })
 
   // Start MySQL
   mysql.connect()

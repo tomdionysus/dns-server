@@ -24,7 +24,7 @@ mysql -u root $DATABASE_NAME < sql/db_setup.sql
 
 ## Running
 
-The server will needs a `DB_URI` in the following format, and will bind to UDP Port 53 by default. MacOS and various other OSes bind `0.0.0.0` UDP Port 53, so it's best to run it on a different one.
+The server needs a `DB_URI` in the following format, and will bind to UDP Port 53 by default. MacOS and various other OSes bind `0.0.0.0` UDP Port 53, so it's best to run it on a different one.
 
 ```bash
 DB_URI=mysql://root@localhost/$DATABASE_NAME LOG_LEVEL=DEBUG PORT=54 node index.js

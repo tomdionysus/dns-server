@@ -29,6 +29,38 @@ describe('MySQL', () => {
     expect(x1.kvstore).toBeUndefined()
   })
 
+  it('should allow uri in defaults', () => {
+    var x1 = new MySQL({ uri: 'mysql://rootuser:complexpassword@dbserver/db' })
+    
+    expect(x1.options.host).toEqual('dbserver')
+    expect(x1.options.user).toEqual('rootuser')
+    expect(x1.options.password).toEqual('complexpassword')
+    expect(x1.options.database).toEqual('db')
+  })
+
+  describe('_parseDBURI', () => {
+    it('should parse URI properly', () => {
+      var x1 = new MySQL()
+
+      x1._parseDBURI('mysql://rootuser:complexpassword@dbserver/db')
+
+      expect(x1.options.host).toEqual('dbserver')
+      expect(x1.options.user).toEqual('rootuser')
+      expect(x1.options.password).toEqual('complexpassword')
+      expect(x1.options.database).toEqual('db')
+    })
+
+    it('should log error on bad parse', () => {
+      var x1 = new MySQL()
+
+      spyOn(x1.logger,'error')
+
+      x1._parseDBURI('asdfghjklwqertyuioxcvbnm')
+
+      expect(x1.logger.error).toHaveBeenCalledWith('Cannot parse options.url (should be mysql://user:password@host:port/database)')
+    })
+  })
+
   describe('_query', () => {
     it('should log, call pool query and callback', () => {
       var conn = {

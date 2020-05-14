@@ -1,6 +1,4 @@
 #!/usr/bin/node
-const url = require('url')
-
 const Logger = require('./lib/Logger')
 const MySQL = require('./lib/MySQL')
 const DNSServer = require('./lib/DNSServer')

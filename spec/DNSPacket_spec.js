@@ -1,7 +1,7 @@
 /* eslint-env jasmine */
 
 const DNSPacket = require('../lib/DNSPacket')
-const { BinaryDeserializer } = require('network-serializer')
+const { BinarySerializer, BinaryDeserializer } = require('network-serializer')
 
 describe('DNSPacket', () => {
   var x1
@@ -633,6 +633,59 @@ describe('DNSPacket', () => {
       expect(x1._writeDomain).toHaveBeenCalledWith(ser,'TARGET')
     })
   })
+
+  describe('_writeDomain', ()=>{
+    var ser
+
+    beforeEach(()=>{
+      ser = new BinarySerializer({ bigEndian: true })
+    })
+
+    it('should write a zero byte on empty string',()=>{
+      x1._writeDomain(ser, '')
+
+      expect([...ser.releaseBuffer()]).toEqual([0])
+    })
+
+    it('should write correct buffer for simple string',()=>{
+      x1._writeDomain(ser, 'testing')
+
+      expect([...ser.releaseBuffer()]).toEqual([ 7, 116, 101, 115, 116, 105, 110, 103, 0 ])
+    })
+
+    it('should write correct buffer for compound string',()=>{
+      x1._writeDomain(ser, 'testing.com')
+
+      expect([...ser.releaseBuffer()]).toEqual([ 7, 116, 101, 115, 116, 105, 110, 103, 3, 99, 111, 109, 0 ])
+    })
+
+    it('should write correct buffer for simple string without final .',()=>{
+      x1._writeDomain(ser, 'testing', false)
+
+      expect([...ser.releaseBuffer()]).toEqual([ 7, 116, 101, 115, 116, 105, 110, 103 ])
+    })
+
+    it('should write correct buffer for compound string  without final .',()=>{
+      x1._writeDomain(ser, 'testing.com', false)
+
+      expect([...ser.releaseBuffer()]).toEqual([ 7, 116, 101, 115, 116, 105, 110, 103, 3, 99, 111, 109 ])
+    })
+
+    it('should write correct buffer for domain with backreference compression',()=>{
+      x1._writeDomain(ser, 'www.testing.com')
+      x1._writeDomain(ser, 'testing.com')
+
+      expect([...ser.releaseBuffer()]).toEqual([ 3, 119, 119, 119, 7, 116, 101, 115, 116, 105, 110, 103, 3, 99, 111, 109, 0, 192, 4 ])
+    })
+
+    it('should write correct buffer for domain with backreference compression without final .',()=>{
+      x1._writeDomain(ser, 'www.testing.com', false)
+      x1._writeDomain(ser, 'testing.com', false)
+
+      expect([...ser.releaseBuffer()]).toEqual([ 3, 119, 119, 119, 7, 116, 101, 115, 116, 105, 110, 103, 3, 99, 111, 109, 192, 4 ])
+    })
+  })
+
 
   describe('_readIPv4', ()=>{
     it('should call readUInt32 and return address',()=>{

@@ -30,7 +30,6 @@ function main () {
   var handle = () => {
     logger.debug('SIGTERM/SIGINT Received - Stopping')
     svr.stop()
-    logger.info('Stopped')
     process.exit()
   }
 
